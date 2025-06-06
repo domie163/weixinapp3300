@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.ShujiaDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.xiaoshuo_id as xiaoshuoId
+        ,a.yonghu_id as yonghuId
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.ShujiaView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,xiaoshuo.xiaoshuo_name as xiaoshuoName
+        ,xiaoshuo.xiaoshuo_photo as xiaoshuoPhoto
+        ,xiaoshuo.xiaoshuo_zuozhe as xiaoshuoZuozhe
+        ,xiaoshuo.xiaoshuo_zishu as xiaoshuoZishu
+        ,xiaoshuo.xiaoshuo_types as xiaoshuoTypes
+        ,xiaoshuo.xiaoshuo_clicknum as xiaoshuoClicknum
+        ,xiaoshuo.shangxia_types as shangxiaTypes
+        ,xiaoshuo.xiaoshuo_delete as xiaoshuoDelete
+        ,xiaoshuo.xiaoshuo_content as xiaoshuoContent
+        ,yonghu.yonghu_name as yonghuName
+        ,yonghu.yonghu_photo as yonghuPhoto
+        ,yonghu.yonghu_phone as yonghuPhone
+        ,yonghu.yonghu_email as yonghuEmail
+        ,yonghu.yonghu_delete as yonghuDelete
+
+        FROM shujia  a
+        left JOIN xiaoshuo xiaoshuo ON a.xiaoshuo_id = xiaoshuo.id
+        left JOIN yonghu yonghu ON a.yonghu_id = yonghu.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.xiaoshuoId != null and params.xiaoshuoId != ''">
+                and (
+                    a.xiaoshuo_id = #{params.xiaoshuoId}
+                )
+            </if>
+            <if test="params.yonghuId != null and params.yonghuId != ''">
+                and (
+                    a.yonghu_id = #{params.yonghuId}
+                )
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断书城信息的id不为空 -->
+            <if test=" params.xiaoshuoIdNotNull != '' and params.xiaoshuoIdNotNull != null and params.xiaoshuoIdNotNull != 'null' ">
+                and a.xiaoshuo_id IS NOT NULL
+            </if>
+            <if test=" params.xiaoshuoName != '' and params.xiaoshuoName != null and params.xiaoshuoName != 'null' ">
+                and xiaoshuo.xiaoshuo_name like CONCAT('%',#{params.xiaoshuoName},'%')
+            </if>
+            <if test=" params.xiaoshuoZuozhe != '' and params.xiaoshuoZuozhe != null and params.xiaoshuoZuozhe != 'null' ">
+                and xiaoshuo.xiaoshuo_zuozhe like CONCAT('%',#{params.xiaoshuoZuozhe},'%')
+            </if>
+            <if test="params.xiaoshuoZishuStart != null  and params.xiaoshuoZishuStart != '' ">
+                <![CDATA[  and xiaoshuo.xiaoshuo_zishu >= #{params.xiaoshuoZishuStart}   ]]>
+            </if>
+            <if test="params.xiaoshuoZishuEnd != null  and params.xiaoshuoZishuEnd != '' ">
+                <![CDATA[  and xiaoshuo.xiaoshuo_zishu <= #{params.xiaoshuoZishuEnd}   ]]>
+            </if>
+            <if test="params.xiaoshuoZishu != null  and params.xiaoshuoZishu != '' ">
+                and xiaoshuo.xiaoshuo_zishu = #{params.xiaoshuoZishu}
+            </if>
+            <if test="params.xiaoshuoTypes != null  and params.xiaoshuoTypes != ''">
+                and xiaoshuo.xiaoshuo_types = #{params.xiaoshuoTypes}
+            </if>
+
+            <if test="params.xiaoshuoClicknumStart != null  and params.xiaoshuoClicknumStart != '' ">
+                <![CDATA[  and xiaoshuo.xiaoshuo_clicknum >= #{params.xiaoshuoClicknumStart}   ]]>
+            </if>
+            <if test="params.xiaoshuoClicknumEnd != null  and params.xiaoshuoClicknumEnd != '' ">
+                <![CDATA[  and xiaoshuo.xiaoshuo_clicknum <= #{params.xiaoshuoClicknumEnd}   ]]>
+            </if>
+            <if test="params.xiaoshuoClicknum != null  and params.xiaoshuoClicknum != '' ">
+                and xiaoshuo.xiaoshuo_clicknum = #{params.xiaoshuoClicknum}
+            </if>
+            <if test="params.shangxiaTypes != null  and params.shangxiaTypes != ''">
+                and xiaoshuo.shangxia_types = #{params.shangxiaTypes}
+            </if>
+
+            <if test="params.xiaoshuoDeleteStart != null  and params.xiaoshuoDeleteStart != '' ">
+                <![CDATA[  and xiaoshuo.xiaoshuo_delete >= #{params.xiaoshuoDeleteStart}   ]]>
+            </if>
+            <if test="params.xiaoshuoDeleteEnd != null  and params.xiaoshuoDeleteEnd != '' ">
+                <![CDATA[  and xiaoshuo.xiaoshuo_delete <= #{params.xiaoshuoDeleteEnd}   ]]>
+            </if>
+            <if test="params.xiaoshuoDelete != null  and params.xiaoshuoDelete != '' ">
+                and xiaoshuo.xiaoshuo_delete = #{params.xiaoshuoDelete}
+            </if>
+            <if test=" params.xiaoshuoContent != '' and params.xiaoshuoContent != null and params.xiaoshuoContent != 'null' ">
+                and xiaoshuo.xiaoshuo_content like CONCAT('%',#{params.xiaoshuoContent},'%')
+            </if>
+                <!-- 判断用户的id不为空 -->
+            <if test=" params.yonghuIdNotNull != '' and params.yonghuIdNotNull != null and params.yonghuIdNotNull != 'null' ">
+                and a.yonghu_id IS NOT NULL
+            </if>
+            <if test=" params.yonghuName != '' and params.yonghuName != null and params.yonghuName != 'null' ">
+                and yonghu.yonghu_name like CONCAT('%',#{params.yonghuName},'%')
+            </if>
+            <if test=" params.yonghuPhone != '' and params.yonghuPhone != null and params.yonghuPhone != 'null' ">
+                and yonghu.yonghu_phone like CONCAT('%',#{params.yonghuPhone},'%')
+            </if>
+            <if test=" params.yonghuEmail != '' and params.yonghuEmail != null and params.yonghuEmail != 'null' ">
+                and yonghu.yonghu_email like CONCAT('%',#{params.yonghuEmail},'%')
+            </if>
+            <if test="params.yonghuDeleteStart != null  and params.yonghuDeleteStart != '' ">
+                <![CDATA[  and yonghu.yonghu_delete >= #{params.yonghuDeleteStart}   ]]>
+            </if>
+            <if test="params.yonghuDeleteEnd != null  and params.yonghuDeleteEnd != '' ">
+                <![CDATA[  and yonghu.yonghu_delete <= #{params.yonghuDeleteEnd}   ]]>
+            </if>
+            <if test="params.yonghuDelete != null  and params.yonghuDelete != '' ">
+                and yonghu.yonghu_delete = #{params.yonghuDelete}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(yonghu.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(yonghu.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+        </where>
+
+        order by a.${params.orderBy} desc 
+    </select>
+
+</mapper>
